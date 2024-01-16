@@ -13,7 +13,7 @@ import com.ntdat.designpatterns.mvp.mvpbutton.MvpButtonPresenter;
 import com.ntdat.designpatterns.mvp.mvpbutton.MvpButtonView;
 
 public class MvpActivity extends AppCompatActivity {
-    private static final String TAG = "NTDAT" + MvpButtonView.class.getSimpleName();
+    private static final String TAG = "NTDAT" + MvpActivity.class.getSimpleName();
     private Button mButton;
     private MvpButtonView mMvpButtonView;
 
