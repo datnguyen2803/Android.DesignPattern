@@ -1,59 +1,90 @@
 package com.ntdat.designpatterns.mvp.base;
 
 import android.content.Context;
+import android.os.Bundle;
 
-import com.ntdat.designpatterns.mvp.Contract;
+import java.util.HashMap;
 
-public abstract class MvpBasePresenter implements Contract.Presenter{
+public abstract class MvpBasePresenter {
+
+    public MvpBaseView mView;
     public Context mContext;
-    private MvpBaseView mView;
-    private MvpBaseModel mModel;
+    private HashMap<String, MvpBaseModel> mModelList;
 
-    public MvpBasePresenter(Context context, MvpBaseView mvpBaseView, MvpBaseModel mvpBaseModel) {
+    protected MvpBasePresenter(Context context, MvpBaseView view) {
         mContext = context;
-        mView = mvpBaseView;
-        mModel = mvpBaseModel;
+        mView = view;
+        init();
+    }
+
+    // already called inside constructor
+    private void init() {
+        mModelList = new HashMap<String, MvpBaseModel>();
+        if(mView != null)
+            mView.bindController(this);
+    }
+
+    // should be call in destructor
+    public void deinit() {
+        for(MvpBaseModel model : mModelList.values()) {
+            model.unregisterListener(this);
+        }
+        // for (BaseModel model : mModelList) {
+        // 	model.unregisterListener(this);
+        // }
+        if(mView != null)
+            mView.unbindController();
+    }
+
+    /**
+     * Connect/Disconnect a model
+     * @param model
+     */
+    public void connectModel(MvpBaseModel model) {
+        if(model == null) return;
+        mModelList.put(model.getClass().getSimpleName(), model);
+        model.registerListener(this);
+    }
+
+    public void disconnectModel(MvpBaseModel model) {
+        if(model == null) return;
+        mModelList.remove(model.getClass().getSimpleName());
+        model.unregisterListener(this);
+    }
+
+    /**
+     * Request to view
+     * @param request
+     */
+    public void requestToView(Bundle request) {
+        if(mView != null)
+            mView.onRequestChange(request);
+    }
+
+    /**
+     * Request to a specific model
+     * @param model - model to from getModel()
+     * @param request
+     */
+    protected void requestToModel(MvpBaseModel model, Bundle request) {
+        if(model != null)
+            model.onRequestChange(request);
     }
 
 
-    // handler for View changes
-    @Override
-    public void onViewChanged(String key, int value) {
-        int newState = handleViewChange(key, value);
-        if(mModel != null) {
-            mModel.update(newState);
-        }
+    /**
+     * Get model in model list by name
+     * @param modelName
+     * @return
+     */
+    public MvpBaseModel getModel(String modelName) {
+        return mModelList.get(modelName);
     }
 
-    // handler for Model changes
-    @Override
-    public void onModelChanged(String key, int value) {
-        int newState = handleModelChange(key, value);
-        if(mView != null) {
-            mView.update(newState);
-        }
-    }
+    // abstract  methods need implementation
+    // handle change from models
+    public abstract void onDataChanged(Bundle data);
+    // handle change from view
+    public abstract void onUIChanged(Bundle data);
 
-    // return state to update Model
-    public abstract int handleViewChange(String key, int value);
-
-    // return state to update View
-    public abstract int handleModelChange(String key, int value);
-
-    public void init() {
-        if(mView != null) {
-            mView.init();
-        }
-        if(mModel != null) {
-            mModel.init();
-        }
-    }
-    public void deInit() {
-        if(mView != null) {
-            mView.deInit();
-        }
-        if(mModel != null) {
-            mModel.deInit();
-        }
-    }
 }

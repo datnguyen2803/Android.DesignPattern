@@ -1,39 +1,51 @@
 package com.ntdat.designpatterns.mvp.base;
 
 import android.content.Context;
-import android.util.Log;
+import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 
-import com.ntdat.designpatterns.mvp.Contract;
-
-public abstract class MvpBaseView implements Contract.View{
-    public Context mContext = null;
-    private View mViewComponent = null;
+public abstract class MvpBaseView {
+    public Context mContext;
+    public View mComponentView;
     private MvpBasePresenter mPresenter;
 
-    public MvpBaseView(Context context, View component, MvpBasePresenter mvpBasePresenter) {
+    public MvpBaseView(Context context, View componentView) {
         mContext = context;
-        mViewComponent = component;
-        mPresenter = mvpBasePresenter;
+        mComponentView = componentView;
+        init();
     }
 
-    @Override
-    // notify UI changed
-    public void notifyChanged(String key, int value){
-        if(mPresenter != null) {
-            mPresenter.onViewChanged(key, value);
-        }
+    /**
+     * bind the corresponding presenter
+     * @param presenter
+     */
+    public void bindController(MvpBasePresenter presenter) {
+        if(presenter != null)
+            mPresenter = presenter;
     }
 
-    @Override
-    // update UI
-    public void update(int state) {
-        updateUI(state);
+    /**
+     * unbind the corresponding controller
+     */
+    public void unbindController() {
+        mPresenter = null;
     }
 
-    public abstract void updateUI(int state);
-    public void init(){}
-    public void deInit(){}
+    /**
+     * notify the controller that the view is changed
+     * @param info
+     */
+    public void notifyUIChanged(Bundle info) {
+        if(mPresenter == null) return;
+        mPresenter.onUIChanged(info);
+    }
 
+    // abstract  methods need implementation
+    // find the component in layout: ImageView, Button... and set touch listener
+    // be called inside constructor
+    protected abstract void init();
+    // should be call in destructor
+    public abstract void deinit();
+    // handle request from controller
+    public abstract void onRequestChange(Bundle request);
 }
