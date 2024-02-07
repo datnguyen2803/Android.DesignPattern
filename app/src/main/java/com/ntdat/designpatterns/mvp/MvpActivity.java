@@ -2,21 +2,15 @@ package com.ntdat.designpatterns.mvp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
+import android.widget.TextView;
 
 import com.ntdat.designpatterns.R;
-import com.ntdat.designpatterns.mvp.mvpbutton.MvpButtonModel;
-import com.ntdat.designpatterns.mvp.mvpbutton.MvpButtonPresenter;
-import com.ntdat.designpatterns.mvp.mvpbutton.MvpButtonView;
 
 public class MvpActivity extends AppCompatActivity {
     private static final String TAG = "NTDAT" + MvpActivity.class.getSimpleName();
-    private Button mButton;
-    private MvpButtonView mMvpButtonView;
+    private TextView mText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,31 +18,19 @@ public class MvpActivity extends AppCompatActivity {
         Log.d(TAG, ">>> onCreate");
         setContentView(R.layout.activity_main);
 
-        mButton = findViewById(R.id.test);
+        BluetoothModel mBluetoothModel = new BluetoothModel(this);
+        UsbModel mUsbModel = new UsbModel(this);
+        ConnectionView mConnectionView = new ConnectionView(this, findViewById(R.id.mvp_text_view));
+        ConnectionPresenter mConnectionPresenter = new ConnectionPresenter(this, mConnectionView);
 
+        mConnectionPresenter.connectModel(mBluetoothModel);
+        mConnectionPresenter.connectModel(mUsbModel);
 
-        mButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "button onClick");
-                mMvpButtonView.notifyChanged();
-
-            }
-        });
-        init();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-    }
-
-    private void init() {
-        mMvpButtonView = new MvpButtonView(this, mButton);
-    }
-
-    private void deInit() {
-        mMvpButtonView.deInit();
     }
 }

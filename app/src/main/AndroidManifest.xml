@@ -16,7 +16,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.DesignPatterns"
-        tools:targetApi="31">
+        tools:targetApi="28">
         <activity
             android:name=".mvp.MvpActivity"
             android:exported="true">
